@@ -23,3 +23,11 @@ any questions or concerns please email:
 JasonZacharyMartinez@Gmail.com
 
 https://www.linkedin.com/in/jason-martinez-597660219/
+
+UI/UX CREDIT:
+
+Veronica Martinez 
+
+veronicanicole39@gmail.com
+
+https://www.linkedin.com/in/veronica-martinez-544425325/

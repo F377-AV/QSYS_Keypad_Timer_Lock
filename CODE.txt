@@ -1,0 +1,525 @@
+--[[------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                            Keypad-Lock
+
+                                                      1         2         3
+                                                      4         5         6
+                                                      7         8         8 
+                                                      C         0        <--
+
+                                                    THIS CODE HAS BEEN CREATED BY                                                                       
+                                                          JASON MARTINEZ                                          
+
+                                                        _________    __    __
+                                                        |__   __|   /  \  /  \
+                                                       __  |  |    /    \/    \ 
+                                                      |  |_|  |   /  /\    /\  \
+                                                      |_______|  /__/  \__/  \__\
+--]]-------------------------------------------------------------------------------------------------------------------------------------------------------
+Color1 = "LimeGreen"
+Color2 = "RoyalBlue"
+Color3 =  "Tomato"
+TimerExpired = "00:00:00"
+
+tblOfKeypad = 
+{
+"1",
+"2",
+"3",
+"4",
+"5",
+"6",
+"7",
+"8",
+"9",
+"0", 
+}
+
+tblOfBuckets = 
+{
+  "",
+  "",
+  "",
+  "",
+  "",
+}
+
+tblOfLED =
+{
+  "",
+  "",
+}
+
+tblOfYesOrNo = 
+{
+  "Yes",
+  "No",
+}
+
+function funcInit()
+  UserPassword = Controls.txtPassword.String
+  Controls.knbCount.Value = 0
+  Controls.indTextField.String = ""
+  --Controls.btnBack.Legend = "Back"
+  --Controls.btnClear.Legend = "Clear"
+  Controls.btnBack.Legend = ""
+  Controls.btnClear.Legend = ""
+  Controls.indLED[1].Color = Color1 
+  Controls.indLED[2].Color = Color3
+  Controls.indTimerExpired.Color = Color2 
+  Controls.btnEnter.Legend = "Enter"
+  Controls.btnAutoEnter.Legend ="Auto Enter"
+  Controls.btnHiddenText.Legend ="Hide Text"
+  Controls.btnRestartTimer.Legend = "Restart Timer"
+  Controls.btnInstantTimerEnd.Legend = "Instant Timer End"
+  Controls.btnShowBothTextFields.Legend = "Click To Show Both Text Fields"
+  Controls.btnTimerActive[1].Legend ="Timer Active"
+  Controls.btnTimerActive[2].Legend ="NOT USED"
+  Controls.btnTimerActive[2].IsDisabled = true
+  Controls.btnTimerActive[2].IsInvisible = true
+  Controls.knbTimer.IsDisabled = false
+  Controls.indTextField.IsInvisible = false
+  Controls.indHiddenText.IsDisabled = false
+  Controls.indHiddenText.String = ""
+  Controls.btnShowBothTextFields.Boolean = false
+  Controls.txtAutoEnter.Choices = tblOfYesOrNo
+  Controls.txtAutoTimer.Choices = tblOfYesOrNo
+  Controls.txtAutoHideText.Choices = tblOfYesOrNo
+  Controls.indPasswordBucket[1].String = 0
+  for i, ctl in pairs(tblOfLED) do
+  argBoolean = false
+      Controls.indLED[i].Boolean = (argBoolean)
+  end
+  for i, ctl in pairs(tblOfKeypad) do
+      Controls.btnKeypad[i].IsDisabled = false 
+  end
+end 
+
+function funcSetBucket()
+  Controls.indTimerBucket.String = Controls.knbTimer.String
+  Controls.knbTimerMirror.String = Controls.knbTimer.String
+end 
+
+function funcSetStartBucket()
+  Controls.indTimerBucket.String = Controls.knbTimerMirror.String
+end 
+
+function funcSetBucketReverse()
+  Controls.knbTimer.String = Controls.indTimerBucket.String
+end 
+
+function funcClearText()
+Controls.indTextField.String = ""
+Controls.indHiddenText.String = ""
+Controls.knbCount.Value = 0
+    for i, ctl in pairs(tblOfBuckets) do
+  argString = ""
+      Controls.indPasswordBucket[i].String = (argString) 
+  end
+end 
+
+function funcTextFeed(argString)
+  Controls.indTextField.String = (argString)
+  Controls.indHiddenText.String = (argString)
+end 
+
+function funcLockButtons(argBoolean)
+Controls.btnClear.IsDisabled = (argBoolean)
+Controls.btnBack.IsDisabled = (argBoolean)
+    for i, ctl in pairs(tblOfKeypad) do
+      Controls.btnKeypad[i].IsDisabled = (argBoolean) 
+  end
+end 
+
+function funcButtonBackDisabled(argBoolean)
+  Controls.btnBack.IsDisabled = (argBoolean)
+end 
+
+function funcTextBucketFeed(argString)
+    for i, ctl in pairs(tblOfBuckets) do
+      Controls.indPasswordBucket[i].String = (argString) 
+  end
+  Controls.indPasswordBucket[1].String = 0
+end 
+
+function funcSetKnobCount(argValue)
+  Controls.knbCount.Value = (argValue)
+end 
+
+function funcCheckStrings()
+  Controls.indPasswordBucket[1].String = Controls.indTextField.String
+end 
+
+function funcSetUserTimer()
+  CountDownTimer = Controls.knbTimer.Value
+  Controls.indTimerBucket.String = Controls.knbTimer.String
+  Controls.knbTimerMirror.String = Controls.knbTimer.String
+end 
+
+function funcAutoEnterAtStart(argString)
+  if (argString) == "Yes" then 
+    argBoolean = true 
+  elseif (argString) == "No" then 
+    argBoolean = false 
+  end 
+    Controls.txtAutoEnter.Boolean = argBoolean
+    Controls.btnAutoEnter.Boolean = argBoolean
+end 
+
+function funcAutoTimerAtStart(argString)
+  if (argString) == "Yes" then 
+    argBoolean = true 
+    Timer.CallAfter(function() UserTimer:Start(.1) end , .6) 
+    Timer.CallAfter(function() funcSetBucketReverse() end , .5) 
+  elseif (argString) == "No" then 
+    funcSetBothLED(false)
+      UserTimer:Stop()
+      funcLockButtons(false)
+      Controls.knbTimer.IsDisabled = false
+      funcTimerExpired(false)
+      argBoolean = false
+  end 
+    Controls.txtAutoTimer.Boolean = argBoolean
+    Controls.btnTimerActive[1].Boolean = argBoolean
+    Controls.knbTimer.IsDisabled = argBoolean
+end 
+
+function funcAutoHideTextAtStart(argString)
+  if (argString) == "Yes" then 
+    argBoolean = true
+    OppargBoolean = false
+  elseif (argString) == "No" then 
+    argBoolean = false 
+    OppargBoolean = true
+  end 
+    Controls.txtAutoHideText.Boolean = argBoolean
+    Controls.btnHiddenText.Boolean = argBoolean
+    Controls.indTextField.IsInvisible = argBoolean
+    Controls.indHiddenText.IsInvisible = OppargBoolean
+end 
+
+function funcSetLED(argBoolean)
+   local OppargBoolean = argBoolean
+    if argBoolean == true then 
+      OppargBoolean = false 
+    elseif argBoolean == false then
+      OppargBoolean = true
+    end 
+  Controls.indLED[1].Boolean = (argBoolean)
+  Controls.indLED[2].Boolean = OppargBoolean
+end 
+
+function funcSetBothLED(argBoolean)
+  Controls.indLED[1].Boolean = (argBoolean)
+  Controls.indLED[2].Boolean = (argBoolean)
+end 
+
+function funcTimerExpired(argBoolean)
+  Controls.indTimerExpired.Boolean = (argBoolean)
+end 
+
+function funcSetAutoEnter(argBoolean)
+  Controls.btnAutoEnter.Boolean = (argBoolean) 
+end 
+
+function funcSetTimerActive(argBoolean)
+  Controls.btnTimerActive[1].Boolean = (argBoolean)
+end 
+
+function funcShowBothTextFields(argBoolean)
+    if (argBoolean) == true then 
+    OppargBoolean = false
+  elseif (argBoolean) == false then  
+    OppargBoolean = true
+  end 
+    Controls.txtAutoHideText.Boolean = (argBoolean)
+    Controls.btnHiddenText.Boolean = (argBoolean)
+    Controls.indTextField.IsInvisible = OppargBoolean
+    Controls.indHiddenText.IsInvisible = OppargBoolean
+end 
+
+function funcHideHiddenText(argBoolean)
+    if (argBoolean) == true then 
+    OppargBoolean = false
+  elseif (argBoolean) == false then  
+    OppargBoolean = true
+  end 
+    Controls.indTextField.IsInvisible = (argBoolean)
+    Controls.indHiddenText.IsInvisible = OppargBoolean
+end 
+
+function funcBothTextButtonLegened(argString)
+  Controls.btnShowBothTextFields.Legend = (argString)
+end 
+
+function funcTimerIsDisabled(argBoolean)
+  Controls.knbTimer.IsDisabled = (argBoolean) 
+end
+
+function funcTimerActiveButtonState(argBoolean)
+  Controls.btnTimerActive[1].Boolean = (argBoolean) 
+end 
+
+function funcHiddenTextFeed(argString)
+  Controls.indHiddenText.String = (argString)
+end 
+
+function funcClearFirstBucket()
+  Controls.indPasswordBucket[1].String = ""
+end 
+
+function funcFillNormalText(argString)
+  Controls.indTextField.String = (argString)
+end 
+
+function funcBucketsEqualsBucket1(argValue)
+  Controls.indPasswordBucket[(argValue)].String = Controls.indPasswordBucket[1].String
+end
+
+
+function funcEmptyTextBuckets(argValue, argString)
+  Controls.indPasswordBucket[(argValue)].String = (argString)
+end 
+
+function funcCheckPassword()
+  if Controls.indPasswordBucket[1].String == UserPassword then 
+    if Controls.btnAutoEnter.Boolean then 
+      Timer.CallAfter(function() funcTextFeed("") end, 1)
+      funcSetLED(true)
+      funcTextBucketFeed("")
+      funcSetKnobCount(0)
+      funcTextFeed("Correct Password")
+      Timer.CallAfter(function() funcLockButtons(false) end, 1)
+      if Controls.btnTimerActive[1].Boolean then 
+        Controls.knbTimer.String = Controls.indTimerBucket.String
+        funcTimerExpired(false) 
+        UserTimer:Start(.1)
+      end 
+    elseif Controls.btnEnter.Boolean then 
+      funcSetLED(true)
+      funcTextBucketFeed("")
+      funcSetKnobCount(0)
+      funcTextFeed("Correct Password")
+      Timer.CallAfter(function() funcTextFeed("") end, 1)
+      Timer.CallAfter(function() funcLockButtons(false) end, 1)
+        if Controls.btnTimerActive[1].Boolean then 
+        Controls.knbTimer.String = Controls.indTimerBucket.String
+        funcTimerExpired(false)
+        UserTimer:Start(.1)
+      end 
+    end 
+  else 
+    funcSetKnobCount(0)
+    funcSetLED(false)
+    funcTextFeed("INCORRECT PASSWORD")
+    funcTextBucketFeed("")
+    Timer.CallAfter(function() funcTextFeed("") end, 1)
+    Timer.CallAfter(function() funcLockButtons(false) end, 1)
+  end
+end 
+
+
+function funcDumpInfoToTextBoxes()
+  if Controls.knbCount.Value == 1 then 
+    Timer.CallAfter(function() funcBucketsEqualsBucket1(2) end, .05)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String) end, .06)
+    funcHiddenTextFeed("*")
+     funcLockButtons(false)
+  elseif Controls.knbCount.Value == 2 then 
+    Timer.CallAfter(function() funcBucketsEqualsBucket1(3) end, .05)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String .. Controls.indPasswordBucket[3].String) end, .09)
+    funcHiddenTextFeed("**")
+     funcLockButtons(false)
+  elseif Controls.knbCount.Value == 3 then
+    Timer.CallAfter(function() funcBucketsEqualsBucket1(4) end, .05)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String .. Controls.indPasswordBucket[3].String .. Controls.indPasswordBucket[4].String) end, .09)
+    funcLockButtons(false)
+    funcHiddenTextFeed("***")
+  elseif Controls.knbCount.Value == 4 then 
+    Timer.CallAfter(function() funcBucketsEqualsBucket1(5) end, .05)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String .. Controls.indPasswordBucket[3].String .. Controls.indPasswordBucket[4].String .. Controls.indPasswordBucket[5].String) end, .09)
+    Timer.CallAfter(funcCheckStrings, .15)
+    funcHiddenTextFeed("****")
+     if Controls.btnAutoEnter.Boolean == true then
+      Timer.CallAfter(funcCheckPassword, .25)
+      funcHiddenTextFeed("****")
+    end
+  end 
+end 
+
+function funcDumpInfoToTextBoxesBack()
+  funcLockButtons(false)
+  if Controls.knbCount.Value == 1 then 
+    Controls.knbCount.Value = Controls.knbCount.Value - 1
+    funcClearFirstBucket()
+    funcHiddenTextFeed("")
+    Timer.CallAfter(function() funcEmptyTextBuckets(2, "") end, .05)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String) end, .07)
+  elseif Controls.knbCount.Value == 2 then 
+    Controls.knbCount.Value = Controls.knbCount.Value - 1
+    funcClearFirstBucket()
+    funcHiddenTextFeed("*")
+    Timer.CallAfter(function() funcEmptyTextBuckets(3, "") end, .07)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String) end, .09)
+  elseif Controls.knbCount.Value == 3 then 
+    Controls.knbCount.Value = Controls.knbCount.Value - 1
+    funcClearFirstBucket()
+    funcHiddenTextFeed("**")
+    Timer.CallAfter(function() funcEmptyTextBuckets(4, "") end, .09)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String .. Controls.indPasswordBucket[3].String) end, .11)
+  elseif Controls.knbCount.Value == 4 then 
+    Controls.knbCount.Value = Controls.knbCount.Value - 1
+    funcClearFirstBucket()
+    funcHiddenTextFeed("****")
+    Timer.CallAfter(function() funcEmptyTextBuckets(5, "") end, .09)
+    Timer.CallAfter(function() funcFillNormalText(Controls.indPasswordBucket[2].String .. Controls.indPasswordBucket[3].String .. Controls.indPasswordBucket[4].String) end, .09)
+  end 
+end 
+
+varBtnCount = Controls.knbCount.Value
+KeypadTimer = Timer.New()
+UserTimer = Timer.New()
+
+for i, ctl in pairs(tblOfKeypad) do
+  --Controls.btnKeypad[i].Legend = ctl
+  Controls.btnKeypad[i].EventHandler = function(ctl)
+    if ctl.Boolean then
+    ctl.Boolean = false 
+      Controls.knbCount.Value = Controls.knbCount.Value + 1
+      funcDumpInfoToTextBoxes()
+        if i == 10 then 
+        i = 0
+        else i = i
+        Controls.indPasswordBucket[1].String = i
+        end 
+      else 
+      KeypadTimer:Stop()
+      funcTimerIsDisabled(false)
+      end
+    end
+end
+
+for i, ctl in pairs(tblOfLED) do
+  Controls.btnTimerActive[i].EventHandler = function(ctl)
+    if ctl.Boolean then  
+      UserTimer:Start(.1)
+      funcTimerIsDisabled(true)
+    else 
+      funcSetBothLED(false)
+      UserTimer:Stop()
+      funcLockButtons(false)
+      funcTimerIsDisabled(false)
+      funcTimerExpired(false)
+      funcSetBucketReverse()
+    end 
+  end
+end
+
+UserTimer.EventHandler = function(ctl)
+  Controls.knbTimer.Value = Controls.knbTimer.Value - .1
+  funcTimerExpired(false)
+  funcLockButtons(true)
+  if Controls.knbTimer.String == TimerExpired then 
+    UserTimer:Stop()
+    funcTimerExpired(true)
+    funcLockButtons(false)
+    funcSetBothLED(false) 
+  end 
+end
+
+KeypadTimer.EventHandler = function()
+  Controls.knbCount.Value = Controls.knbCount.Value + 1
+  funcDumpInfoToTextBoxes()
+end
+
+Controls.btnBack.EventHandler = function(ctl)
+  if ctl.Boolean then
+    funcButtonBackDisabled(true)
+  else 
+    funcButtonBackDisabled(false)
+    funcDumpInfoToTextBoxesBack()
+  end 
+end 
+
+Controls.btnAutoEnter.EventHandler = function(ctl)
+  if ctl.Boolean == true
+  and  Controls.knbCount.Value == 4 then 
+    funcCheckPassword()
+  else
+  end
+end 
+
+Controls.btnEnter.EventHandler = function(ctl)
+  if ctl.Boolean then 
+    funcCheckPassword()
+  else
+  end
+end 
+
+Controls.btnInstantTimerEnd.EventHandler = function(ctl)
+  funcTimerExpired(true)
+  funcLockButtons(false)
+  funcSetBothLED(false)
+  funcTimerIsDisabled(false) 
+  UserTimer:Stop()
+end 
+
+Controls.btnRestartTimer.EventHandler = function()
+  funcSetBucketReverse()
+  funcTimerActiveButtonState(true) 
+  funcTimerIsDisabled(true)
+  Timer.CallAfter(function() UserTimer:Start(.1) end, .05)
+end
+
+
+Controls.knbTimer.EventHandler = function()
+  funcSetUserTimer()
+  UserTimer:Stop()
+  funcTimerActiveButtonState(false)
+end 
+
+Controls.btnHiddenText.EventHandler = function(ctl)
+ Controls.btnShowBothTextFields.Boolean = false
+  if ctl.Boolean then
+    funcHideHiddenText(true)
+  else
+    funcHideHiddenText(false)
+  end
+end
+
+Controls.txtAutoEnter.EventHandler = function(ctl)
+  funcAutoEnterAtStart(ctl.String)
+end 
+
+Controls.txtAutoTimer.EventHandler = function(ctl)
+  funcAutoTimerAtStart(ctl.String)
+end 
+
+Controls.txtAutoHideText.EventHandler = function(ctl)
+  funcAutoHideTextAtStart(ctl.String)
+end 
+
+Controls.btnShowBothTextFields.EventHandler = function(ctl)
+  if ctl.Boolean == true then 
+   funcShowBothTextFields(true)
+  funcBothTextButtonLegened("BOTH Text Fields Currently Showing") 
+  elseif ctl.Boolean == false 
+  and Controls.btnHiddenText.Boolean == true then
+   funcHideHiddenText(true)
+    funcBothTextButtonLegened("Click To Show Both Text Fields")
+  elseif ctl.Boolean == false 
+  and Controls.btnHiddenText.Boolean == false then
+   funcHideHiddenText(false)
+    funcBothTextButtonLegened("Click To Show Both Text Fields")
+  end
+end 
+
+Controls.btnClear.EventHandler = funcClearText
+Controls.txtPassword.EventHandler = funcInit
+Controls.indTimerBucket.EventHandler = funcSetBucket
+Controls.knbTimerMirror.EventHandler = funcSetBucket
+
+funcInit()
+funcSetStartBucket()
+funcAutoEnterAtStart(Controls.txtAutoEnter.String)
+funcAutoHideTextAtStart(Controls.txtAutoHideText.String)
+funcAutoTimerAtStart(Controls.txtAutoTimer.String)
